@@ -1,4 +1,3 @@
-<!-- Load the show_hwconfig program. -->
 <Data>
 	<Hex address="${%LOAD_ADDRESS%}">
 ${%PROGRAM_DATA%}
