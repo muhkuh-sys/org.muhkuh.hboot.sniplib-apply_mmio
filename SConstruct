@@ -62,8 +62,9 @@ tmp_netx4000_cr7 = env_netx4000_cr7.GccSymbolTemplate('targets/netx4000_cr7/snip
 
 # Create the snippet from the parameters.
 global PROJECT_VERSION
+aArtifactGroupReverse = ['org', 'muhkuh', 'hboot', 'sniplib']
 atSnippet = {
-    'group': 'org.muhkuh.hboot.sniplib',
+    'group': '.'.join(aArtifactGroupReverse),
     'artifact': 'apply_mmio',
     'version': PROJECT_VERSION,
     'vcs-id': env_netx4000_cr7.Version_GetVcsId(),
@@ -73,7 +74,8 @@ atSnippet = {
     'description': 'Apply the current MMIO configuration.',
     'categories': ['netx4000', 'hardware configuration', 'mmio']
 }
-snippet_netx4000_cr7 = env_netx4000_cr7.HBootSnippet('targets/snippets/hboot_snippet_netx4000_cr7_%s-%s.xml' % (atSnippet['artifact'], PROJECT_VERSION), tmp_netx4000_cr7, PARAMETER=atSnippet)
+strArtifactPath = 'targets/snippets/%s/%s/%s' % ('/'.join(aArtifactGroupReverse), atSnippet['artifact'], PROJECT_VERSION)
+snippet_netx4000_cr7 = env_netx4000_cr7.HBootSnippet('%s/%s-%s.xml' % (strArtifactPath, atSnippet['artifact'], PROJECT_VERSION), tmp_netx4000_cr7, PARAMETER=atSnippet)
 
 # Create the POM file.
-tPOM = env_netx4000_cr7.POMTemplate('targets/snippets/hboot_snippet_netx4000_cr7_%s-%s.pom' % (atSnippet['artifact'], PROJECT_VERSION), 'templates/pom.xml', POM_TEMPLATE_GROUP=atSnippet['group'], POM_TEMPLATE_ARTIFACT=atSnippet['artifact'], POM_TEMPLATE_VERSION=atSnippet['version'], POM_TEMPLATE_PACKAGING='xml')
+tPOM = env_netx4000_cr7.POMTemplate('%s/%s-%s.pom' % (strArtifactPath, atSnippet['artifact'], PROJECT_VERSION), 'templates/pom.xml', POM_TEMPLATE_GROUP=atSnippet['group'], POM_TEMPLATE_ARTIFACT=atSnippet['artifact'], POM_TEMPLATE_VERSION=atSnippet['version'], POM_TEMPLATE_PACKAGING='xml')
