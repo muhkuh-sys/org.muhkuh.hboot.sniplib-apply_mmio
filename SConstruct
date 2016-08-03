@@ -40,15 +40,6 @@ env_default.Version('#targets/version/version.h', 'templates/version.h')
 
 
 #----------------------------------------------------------------------------
-#
-# Build the platform libraries.
-#
-PLATFORM_LIB_CFG_BUILDS = [4000, 56]
-SConscript('platform/SConscript', exports='PLATFORM_LIB_CFG_BUILDS')
-Import('platform_lib_netx4000', 'platform_lib_netx56')
-
-
-#----------------------------------------------------------------------------
 # This is the list of sources. The elements must be separated with whitespace
 # (i.e. spaces, tabs, newlines). The amount of whitespace does not matter.
 sources = """
@@ -64,7 +55,7 @@ sources = """
 env_netx4000_cr7 = env_netx4000_default.Clone()
 env_netx4000_cr7.Replace(LDFILE = 'src/netx4000/netx4000_cr7.ld')
 src_netx4000_cr7 = env_netx4000_cr7.SetBuildPath('targets/netx4000_cr7', 'src', sources)
-elf_netx4000_cr7 = env_netx4000_cr7.Elf('targets/netx4000_cr7/netx4000_cr7.elf', src_netx4000_cr7 + platform_lib_netx4000)
+elf_netx4000_cr7 = env_netx4000_cr7.Elf('targets/netx4000_cr7/netx4000_cr7.elf', src_netx4000_cr7)
 txt_netx4000_cr7 = env_netx4000_cr7.ObjDump('targets/netx4000_cr7/netx4000_cr7.txt', elf_netx4000_cr7, OBJDUMP_FLAGS=['--disassemble', '--source', '--all-headers', '--wide'])
 bin_netx4000_cr7 = env_netx4000_cr7.ObjCopy('targets/netx4000_cr7/netx4000_cr7.bin', elf_netx4000_cr7)
 tmp_netx4000_cr7 = env_netx4000_cr7.GccSymbolTemplate('targets/netx4000_cr7/snippet.xml', elf_netx4000_cr7, GCCSYMBOLTEMPLATE_TEMPLATE='templates/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=bin_netx4000_cr7[0])
