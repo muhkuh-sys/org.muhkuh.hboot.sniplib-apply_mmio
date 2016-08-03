@@ -33,13 +33,6 @@ Export('env_netx4000_default', 'env_netx56_default')
 
 
 #----------------------------------------------------------------------------
-#
-# Get the source code version from the VCS.
-#
-env_default.Version('#targets/version/version.h', 'templates/version.h')
-
-
-#----------------------------------------------------------------------------
 # This is the list of sources. The elements must be separated with whitespace
 # (i.e. spaces, tabs, newlines). The amount of whitespace does not matter.
 sources = """
