@@ -58,7 +58,7 @@ global PROJECT_VERSION
 aArtifactGroupReverse = ['org', 'muhkuh', 'hboot', 'sniplib']
 atSnippet = {
     'group': '.'.join(aArtifactGroupReverse),
-    'artifact': 'apply_mmio',
+    'artifact': 'apply_mmio_netx4000',
     'version': PROJECT_VERSION,
     'vcs_id': env_netx4000_cr7.Version_GetVcsId(),
     'vcs_url': 'https://github.com/muhkuh-sys/org.muhkuh.hboot.sniplib-apply_mmio.git',
