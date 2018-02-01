@@ -5,32 +5,14 @@
 # Set up the Muhkuh Build System.
 #
 SConscript('mbs/SConscript')
-Import('env_default')
+Import('atEnv')
 
-# Create a build environment for the ARM9 based netX chips.
-env_arm9 = env_default.CreateEnvironment(['gcc-arm-none-eabi-4.7', 'asciidoc'])
+# Create a build environment for the Cortex-R7 and Cortex-A9 based netX chips.
+env_cortexR7 = atEnv.DEFAULT.CreateEnvironment(['gcc-arm-none-eabi-4.9', 'asciidoc'])
+env_cortexR7.CreateCompilerEnv('NETX4000_RELAXED', ['arch=armv7', 'thumb'], ['arch=armv7-r', 'thumb'])
+env_cortexR7.CreateCompilerEnv('NETX4000_FULL', ['arch=armv7', 'thumb'], ['arch=armv7-r', 'thumb'])
 
-# Create a build environment for the Cortex-R based netX chips.
-env_cortex7 = env_default.CreateEnvironment(['gcc-arm-none-eabi-4.9', 'asciidoc'])
-
-
-#----------------------------------------------------------------------------
-#
-# Create the compiler environments.
-#
-astrIncludePaths = ['src', '#platform/src', '#platform/src/lib', '#targets/version']
-
-
-env_netx4000_default = env_cortex7.CreateCompilerEnv('4000', ['arch=armv7', 'thumb'], ['arch=armv7-r', 'thumb'])
-env_netx4000_default.Append(CPPPATH = astrIncludePaths)
-env_netx4000_default.Replace(BOOTBLOCK_CHIPTYPE = 4000)
-
-env_netx56_default = env_arm9.CreateCompilerEnv('56', ['arch=armv5te'])
-env_netx56_default.Append(CPPPATH = astrIncludePaths)
-env_netx56_default.Replace(BOOTBLOCK_CHIPTYPE = 56)
-
-Export('env_netx4000_default', 'env_netx56_default')
-
+global PROJECT_VERSION
 
 #----------------------------------------------------------------------------
 # This is the list of sources. The elements must be separated with whitespace
@@ -39,29 +21,30 @@ sources = """
 	src/main.c
 """
 
+astrIncludePaths = ['src', '#platform/src', '#platform/src/lib', '#targets/version']
+
 
 #----------------------------------------------------------------------------
 #
-# Build all files.
+# Build the netX4000 version.
 #
-# netX4000 CR7
-env_netx4000_cr7 = env_netx4000_default.Clone()
-env_netx4000_cr7.Replace(LDFILE = 'src/netx4000/netx4000_cr7.ld')
-src_netx4000_cr7 = env_netx4000_cr7.SetBuildPath('targets/netx4000_cr7', 'src', sources)
-elf_netx4000_cr7 = env_netx4000_cr7.Elf('targets/netx4000_cr7/netx4000_cr7.elf', src_netx4000_cr7)
-txt_netx4000_cr7 = env_netx4000_cr7.ObjDump('targets/netx4000_cr7/netx4000_cr7.txt', elf_netx4000_cr7, OBJDUMP_FLAGS=['--disassemble', '--source', '--all-headers', '--wide'])
-bin_netx4000_cr7 = env_netx4000_cr7.ObjCopy('targets/netx4000_cr7/netx4000_cr7.bin', elf_netx4000_cr7)
-tmp_netx4000_cr7 = env_netx4000_cr7.GccSymbolTemplate('targets/netx4000_cr7/snippet.xml', elf_netx4000_cr7, GCCSYMBOLTEMPLATE_TEMPLATE='templates/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=bin_netx4000_cr7[0])
+env_netx4000 = atEnv.NETX4000_RELAXED.Clone()
+env_netx4000.Append(CPPPATH = astrIncludePaths)
+env_netx4000.Replace(LDFILE = 'src/netx4000/netx4000_cr7.ld')
+src_netx4000 = env_netx4000.SetBuildPath('targets/netx4000', 'src', sources)
+elf_netx4000 = env_netx4000.Elf('targets/netx4000/netx4000.elf', src_netx4000)
+txt_netx4000 = env_netx4000.ObjDump('targets/netx4000/netx4000.txt', elf_netx4000, OBJDUMP_FLAGS=['--disassemble', '--source', '--all-headers', '--wide'])
+bin_netx4000 = env_netx4000.ObjCopy('targets/netx4000/netx4000.bin', elf_netx4000)
+tmp_netx4000 = env_netx4000.GccSymbolTemplate('targets/netx4000/snippet.xml', elf_netx4000, GCCSYMBOLTEMPLATE_TEMPLATE='templates/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=bin_netx4000[0])
 
 # Create the snippet from the parameters.
-global PROJECT_VERSION
 aArtifactGroupReverse = ['org', 'muhkuh', 'hboot', 'sniplib']
 atSnippet = {
     'group': '.'.join(aArtifactGroupReverse),
     'artifact': 'apply_mmio_netx4000',
     'version': PROJECT_VERSION,
-    'vcs_id': env_netx4000_cr7.Version_GetVcsIdLong(),
-    'vcs_url': env_netx4000_cr7.Version_GetVcsUrl(),
+    'vcs_id': env_netx4000.Version_GetVcsIdLong(),
+    'vcs_url': env_netx4000.Version_GetVcsUrl(),
     'license': 'GPL-2.0',
     'author_name': 'Muhkuh team',
     'author_url': 'https://github.com/muhkuh-sys',
@@ -69,7 +52,7 @@ atSnippet = {
     'categories': ['netx4000', 'hardware configuration', 'mmio']
 }
 strArtifactPath = 'targets/snippets/%s/%s/%s' % ('/'.join(aArtifactGroupReverse), atSnippet['artifact'], PROJECT_VERSION)
-snippet_netx4000_cr7 = env_netx4000_cr7.HBootSnippet('%s/%s-%s.xml' % (strArtifactPath, atSnippet['artifact'], PROJECT_VERSION), tmp_netx4000_cr7, PARAMETER=atSnippet)
+snippet_netx4000 = env_netx4000.HBootSnippet('%s/%s-%s.xml' % (strArtifactPath, atSnippet['artifact'], PROJECT_VERSION), tmp_netx4000, PARAMETER=atSnippet)
 
 # Create the POM file.
-tPOM = env_netx4000_cr7.POMTemplate('%s/%s-%s.pom' % (strArtifactPath, atSnippet['artifact'], PROJECT_VERSION), 'templates/pom.xml', POM_TEMPLATE_GROUP=atSnippet['group'], POM_TEMPLATE_ARTIFACT=atSnippet['artifact'], POM_TEMPLATE_VERSION=atSnippet['version'], POM_TEMPLATE_PACKAGING='xml')
+tPOM = env_netx4000.POMTemplate('%s/%s-%s.pom' % (strArtifactPath, atSnippet['artifact'], PROJECT_VERSION), 'templates/pom.xml', POM_TEMPLATE_GROUP=atSnippet['group'], POM_TEMPLATE_ARTIFACT=atSnippet['artifact'], POM_TEMPLATE_VERSION=atSnippet['version'], POM_TEMPLATE_PACKAGING='xml')
