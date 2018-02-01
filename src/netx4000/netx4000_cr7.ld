@@ -13,7 +13,7 @@ SECTIONS
 	{
 		/* NOTE: include all sections here which should be empty.
 		 */
-		*(.data)
+		*(.data*)
 		*(.glue*)
 		*(.vfp11_veneer)
 		*(.v4_bx)
